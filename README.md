@@ -175,6 +175,114 @@
     
     -- COMANDOS CREACIÓN DE TABLAS 
 
+    DROP DATABASE IF EXISTS project;
+    CREATE DATABASE project;
+    USE project
+
+    CREATE TABLE pais (
+    id_pais INT(5),
+    nombre_pais VARCHAR(20),
+    PRIMARY KEY (id_pais)
+    );
+
+    CREATE TABLE region (
+    id_region INT(5),
+    nombre_region VARCHAR(20),
+    id_pais INT(5),
+    PRIMARY KEY (id_region),
+    FOREIGN KEY (id_pais) REFERENCES pais(id_pais)
+    );
+
+    CREATE TABLE ciudad (
+    id_ciudad INT(5),
+    nombre_ciudad VARCHAR(50),
+    codigo_postal VARCHAR(10),
+    id_region INT(5),
+    PRIMARY KEY (id_ciudad),
+    FOREIGN KEY (id_region) REFERENCES region(id_region)
+    );
+
+    CREATE TABLE direccion (
+    id_direccion INT(5),
+    tipo_direccion VARCHAR(50),
+    direccion VARCHAR(50),
+    descripcion TEXT,
+    id_ciudad INT(5),
+    PRIMARY KEY (id_direccion),
+    FOREIGN KEY (id_ciudad) REFERENCES ciudad(id_ciudad)
+    );
+
+    CREATE TABLE oficina (
+    id_oficina VARCHAR(10) NOT NULL,
+    id_ciudad INT(5) NOT NULL,
+    telefono VARCHAR(20) NOT NULL,
+    id_direccion INT(5) NOT NULL,
+    PRIMARY KEY (id_oficina),
+    FOREIGN KEY (id_ciudad) REFERENCES ciudad (id_ciudad),   
+    FOREIGN KEY (id_direccion) REFERENCES direccion (id_direccion)   
+    );
+
+    CREATE TABLE empleado (
+    id_empleado INT(11),
+    nombre VARCHAR(50),
+    apellido1 VARCHAR(50),
+    apellido2 VARCHAR(50),
+    extension VARCHAR(10),
+    email VARCHAR(100),
+    id_oficina VARCHAR(10),
+    id_jefe INT(11),
+    puesto VARCHAR(50),
+    PRIMARY KEY (id_empleado),
+    FOREIGN KEY (id_oficina) REFERENCES oficina(id_oficina),
+    FOREIGN KEY (id_jefe) REFERENCES empleado(id_empleado)
+    );
+
+    CREATE TABLE cliente (
+    id_cliente INT(11),
+    nombre_cliente VARCHAR(50),
+    nombre_contacto VARCHAR(30),
+    apellido_contacto VARCHAR(30),
+    telefono VARCHAR(15),
+    fax VARCHAR(15),
+    id_direccion INT(5),
+    id_ciudad INT(5),
+    id_empleado_rep_ventas INT(11),
+    limite_credito DECIMAL(15,2),
+    PRIMARY KEY (id_cliente),
+    FOREIGN KEY (id_direccion) REFERENCES direccion(id_direccion),
+    FOREIGN KEY (id_ciudad) REFERENCES ciudad(id_ciudad),
+    FOREIGN KEY (id_empleado_rep_ventas) REFERENCES empleado(id_empleado)
+    );
+
+    CREATE TABLE forma_de_pago (
+    id_forma_de_pago INT(5),
+    nombre_forma_de_pago VARCHAR(50),
+    PRIMARY KEY (id_forma_de_pago)
+    );
+
+    CREATE TABLE pago (
+    id_transaccion VARCHAR(50),
+    id_cliente INT(11),
+    id_forma_pago INT(5),
+    fecha_pago DATE,
+    total DECIMAL(15,2),
+    PRIMARY KEY (id_transaccion),
+    FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente),
+    FOREIGN KEY (id_forma_pago) REFERENCES forma_de_pago(id_forma_de_pago)
+    );
+
+    CREATE TABLE pedido (
+    id_pedido INT(11),
+    fecha_pedido DATE,
+    fecha_esperada DATE,
+    fecha_entrega DATE,
+    estado VARCHAR(15),
+    comentarios TEXT,
+    id_cliente INT(11),
+    PRIMARY KEY (id_pedido),
+    FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente)
+    );
+
     CREATE TABLE gama_producto (
     gama VARCHAR(50),
     descripcion_texto TEXT,
@@ -217,111 +325,129 @@
     FOREIGN KEY (id_producto) REFERENCES producto(id_producto)
     );
 
-    CREATE TABLE pedido (
-    id_pedido INT(11),
-    fecha_pedido DATE,
-    fecha_esperada DATE,
-    fecha_entrega DATE,
-    estado VARCHAR(15),
-    comentarios TEXT,
-    id_cliente INT(11),
-    PRIMARY KEY (id_pedido),
-    FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente)
-    );
-
-    CREATE TABLE cliente (
-    id_cliente INT(11),
-    nombre_cliente VARCHAR(50),
-    nombre_contacto VARCHAR(30),
-    apellido_contacto VARCHAR(30),
-    telefono VARCHAR(15),
-    fax VARCHAR(15),
-    id_direccion INT(5),
-    id_ciudad INT(5),
-    id_empleado_rep_ventas INT(11),
-    limite_credito DECIMAL(15,2),
-    PRIMARY KEY (id_cliente),
-    FOREIGN KEY (id_direccion) REFERENCES direccion(id_direccion),
-    FOREIGN KEY (id_ciudad) REFERENCES ciudad(id_ciudad),
-    FOREIGN KEY (id_empleado_rep_ventas) REFERENCES empleado(id_empleado)
-    );
-
-    CREATE TABLE pago (
-    id_transaccion VARCHAR(50),
-    id_cliente INT(11),
-    id_forma_pago INT(5),
-    fecha_pago DATE,
-    total DECIMAL(15,2),
-    PRIMARY KEY (id_transaccion),
-    FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente),
-    FOREIGN KEY (id_forma_pago) REFERENCES forma_de_pago(id_forma_de_pago)
-    );
-
-    CREATE TABLE forma_de_pago (
-    id_forma_de_pago INT(5),
-    nombre_forma_de_pago VARCHAR(50),
-    PRIMARY KEY (id_forma_de_pago)
-    );
-
-    CREATE TABLE empleado (
-    id_empleado INT(11),
-    nombre VARCHAR(50),
-    apellido1 VARCHAR(50),
-    apellido2 VARCHAR(50),
-    extension VARCHAR(10),
-    email VARCHAR(100),
-    id_oficina VARCHAR(10),
-    id_jefe INT(11),
-    puesto VARCHAR(50),
-    PRIMARY KEY (id_empleado),
-    FOREIGN KEY (id_oficina) REFERENCES oficina(id_oficina),
-    FOREIGN KEY (id_jefe) REFERENCES empleado(id_empleado)
-    );
-
-    CREATE TABLE oficina (
-    id_oficina VARCHAR(10) NOT NULL,
-    id_ciudad INT(5) NOT NULL,
-    telefono VARCHAR(20) NOT NULL,
-    id_direccion INT(5) NOT NULL,
-    PRIMARY KEY (id_oficina),
-    FOREIGN KEY (id_ciudad) REFERENCES ciudad (id_ciudad),   
-    FOREIGN KEY (id_direccion) REFERENCES direccion (id_direccion)   
-    );
-
-    CREATE TABLE direccion (
-    id_direccion INT(5),
-    tipo_direccion VARCHAR(50),
-    direccion VARCHAR(50),
-    descripcion TEXT,
-    id_ciudad INT(5),
-    PRIMARY KEY (id_direccion),
-    FOREIGN KEY (id_ciudad) REFERENCES ciudad(id_ciudad)
-    );
-
-    CREATE TABLE ciudad (
-    id_ciudad INT(5),
-    nombre_ciudad VARCHAR(50),
-    codigo_postal VARCHAR(10),
-    id_region INT(5),
-    PRIMARY KEY (id_ciudad),
-    FOREIGN KEY (id_region) REFERENCES region(id_region)
-    );
-
-    CREATE TABLE region (
-    id_region INT(5),
-    nombre_region VARCHAR(20),
-    id_pais INT(5),
-    PRIMARY KEY (id_region),
-    FOREIGN KEY (id_pais) REFERENCES pais(id_pais)
-    );
-
-    CREATE TABLE pais (
-    id_pais INT(5),
-    nombre_pais VARCHAR(20),
-    PRIMARY KEY (id_pais)
-    );
-
     -- INSERCIÓN DE DATOS
+
+    INSERT INTO pais (id_pais, nombre_pais) VALUES
+    (1, 'Estados Unidos'),
+    (2, 'Francia'),
+    (3, 'España'),
+    (4, 'Colombia');
+
+    INSERT INTO region (id_region, nombre_region, id_pais) VALUES
+    (1, 'California', 1),
+    (2, 'Nueva York', 1),
+    (3, 'Isère', 2),
+    (4, 'Valle del Loira', 2),
+    (5, 'Andalucía', 3),
+    (6, 'Cataluña', 3),
+    (7, 'Bogotá D.C.', 4),
+    (8, 'Antioquia', 4);
+
+    INSERT INTO ciudad (id_ciudad, nombre_ciudad, codigo_postal, id_region) VALUES
+    (1, 'Los Angeles', '90001', 1),
+    (2, 'San Francisco', '94102', 1),
+    (3, 'New York', '10001', 2),
+    (4, 'Buffalo', '14201', 2),
+    (5, 'Grenoble', '38000', 3),
+    (6, 'Lyon', '69001', 3),
+    (7, 'Tours', '37000', 4),
+    (8, 'Orléans', '45000', 4),
+    (9, 'Sevilla', '41001', 5),
+    (10, 'Málaga', '29001', 5),
+    (11, 'Barcelona', '08001', 6),
+    (12, 'Girona', '17001', 6),
+    (13, 'Bogotá', '11001', 7),
+    (14, 'Medellín', '05001', 8),
+    (15, 'Madrid', '28001', 1);
+
+    INSERT INTO direccion (id_direccion, tipo_direccion, direccion, descripcion, id_ciudad) VALUES
+    (1, 'Oficina', '123 Main Street', 'Oficina principal', 1),
+    (2, 'Casa', '456 Elm Street', 'Casa de ejemplo', 2),
+    (3, 'Oficina', '789 Oak Street', 'Oficina céntrica', 3),
+    (4, 'Casa', '101 Maple Street', 'Casa de muestra', 4),
+    (5, 'Oficina', '123 Rue de la République', 'Oficina principal', 5),
+    (6, 'Casa', '456 Rue du Docteur Valois', 'Casa de ejemplo', 6),
+    (7, 'Oficina', '789 Rue de la Soie', 'Oficina céntrica', 7),
+    (8, 'Casa', '101 Rue du Commerce', 'Casa de muestra', 8),
+    (9, 'Oficina', '123 Avenida de la Constitución', 'Oficina principal', 9),
+    (10, 'Casa', '456 Calle Larios', 'Casa de ejemplo', 10),
+    (11, 'Oficina', '789 Passeig de Gràcia', 'Oficina céntrica', 11),
+    (12, 'Casa', '101 Carrer dels Arcs', 'Casa de muestra', 12),
+    (13, 'Oficina', '123 Calle 7', 'Oficina principal', 13),
+    (14, 'Casa', '456 Carrera 70', 'Casa de ejemplo', 14);
+
+    INSERT INTO oficina (id_oficina, id_ciudad, telefono, id_direccion) VALUES
+    ('OF001', 1, '123-456-7890', 1),
+    ('OF002', 2, '987-654-3210', 2),
+    ('OF003', 3, '111-222-3333', 3),
+    ('OF004', 4, '444-555-6666', 4),
+    ('OF005', 5, '777-888-9999', 5),
+    ('OF006', 6, '000-111-2222', 6),
+    ('OF007', 7, '333-444-5555', 7),
+    ('OF008', 8, '666-777-8888', 8),
+    ('OF009', 9, '999-000-1111', 9),
+    ('OF010', 10, '222-333-4444', 10),
+    ('OF011', 11, '555-666-7777', 11),
+    ('OF012', 12, '888-999-0000', 12),
+    ('OF013', 13, '121-314-1516', 13),
+    ('OF014', 14, '161-718-1920', 14);
+
+    INSERT INTO empleado (id_empleado, nombre, apellido1, apellido2, extension, email, id_oficina, id_jefe, puesto) VALUES
+    (1, 'Juan', 'García', 'López', '123', 'juan.garcia@example.com', 'OF001', NULL, 'Gerente'),
+    (2, 'María', 'Martínez', 'Rodríguez', '456', 'maria.martinez@example.com', 'OF002', 1, 'Representante de ventas'),
+    (3, 'Pedro', 'Hernández', 'Pérez', '789', 'pedro.hernandez@example.com', 'OF003', 1, 'Representante de ventas'),
+    (4, 'Ana', 'López', 'Gómez', '012', 'ana.lopez@example.com', 'OF004', 2, 'Asistente'),
+    (5, 'Carlos', 'Díaz', 'Sánchez', '345', 'carlos.diaz@example.com', 'OF005', 2, 'Asistente'),
+    (6, 'Laura', 'Rodríguez', 'Fernández', '678', 'laura.rodriguez@example.com', 'OF006', 3, 'Asistente'),
+    (7, 'Javier', 'Gómez', 'Martínez', '901', 'javier.gomez@example.com', 'OF007', 3, 'Asistente'),
+    (8, 'Sofía', 'Pérez', 'González', '234', 'sofia.perez@example.com', 'OF008', 4, 'Asistente'),
+    (9, 'Diego', 'Fernández', 'López', '567', 'diego.fernandez@example.com', 'OF009', 4, 'Asistente'),
+    (10, 'Elena', 'Sánchez', 'Martínez', '890', 'elena.sanchez@example.com', 'OF010', 5, 'Asistente'),
+    (11, 'Pablo', 'González', 'Hernández', '123', 'pablo.gonzalez@example.com', 'OF011', 5, 'Representante de ventas'),
+    (12, 'Isabel', 'Gómez', 'Rodríguez', '456', 'isabel.gomez@example.com', 'OF012', 6, 'Asistente'),
+    (13, 'Andrés', 'Martínez', 'Díaz', '789', 'andres.martinez@example.com', 'OF013', 6, 'Asistente'),
+    (14, 'Luisa', 'Hernández', 'Sánchez', '012', 'luisa.hernandez@example.com', 'OF014', 7, 'Asistente'),
+    (15, 'Samuel', 'Rubiano', 'Orjuela', '1234', 'correo@ejemplo.com', NULL, NULL, 'CEO');
+
+    INSERT INTO cliente (id_cliente, nombre_cliente, nombre_contacto, apellido_contacto, telefono, fax, id_direccion, id_ciudad, id_empleado_rep_ventas, limite_credito) VALUES
+    (1, 'Cliente A', 'Juan', 'Pérez', '123-456-7890', '123-456-7890', 1, 1, 1, 10000.00),
+    (2, 'Cliente B', 'María', 'Gómez', '987-654-3210', '987-654-3210', 2, 2, 2, 15000.00),
+    (3, 'Cliente C', 'Pedro', 'Rodríguez', '111-222-3333', '111-222-3333', 3, 3, 3, 20000.00),
+    (4, 'Cliente D', 'Ana', 'López', '444-555-6666', '444-555-6666', 4, 4, 4, 25000.00),
+    (5, 'Cliente E', 'Carlos', 'Martínez', '777-888-9999', '777-888-9999', 5, 5, 5, 30000.00),
+    (6, 'Cliente F', 'Laura', 'Fernández', '000-111-2222', '000-111-2222', 6, 6, 6, 35000.00),
+    (7, 'Cliente G', 'Javier', 'Gómez', '333-444-5555', '333-444-5555', 7, 7, 7, 40000.00),
+    (8, 'Cliente H', 'Sofía', 'Pérez', '666-777-8888', '666-777-8888', 8, 8, 8, 45000.00),
+    (9, 'Cliente I', 'Diego', 'Hernández', '999-000-1111', '999-000-1111', 9, 9, 9, 50000.00),
+    (10, 'Cliente J', 'Elena', 'Sánchez', '222-333-4444', '222-333-4444', 10, 10, 10, 55000.00),
+    (11, 'Cliente Madrid', 'Juan', 'López', '123456789', '987654321', 1, 15, 11, 5000.00),
+    (12, 'Cliente Nuevo 1', 'Angel', 'Gomez', '123456789', '987654321', NULL, 1, 1, 1000.00),
+    (13, 'Cliente Nuevo 2', 'Claudia', 'Rodriguez', '987654321', '123456789', NULL, 2, 2, 2000.00),
+    (14, 'Cliente Nuevo 3', 'Juan', 'Ramirez', '66061005', '160020265', 13, 13, NULL, 35000.00),
+    (15, 'Cliente Nuevo 4', 'Mario', 'Bros', '66161516', '516156115', 1, 1, NULL, 2.00);
+
+    INSERT INTO forma_de_pago (id_forma_de_pago, nombre_forma_de_pago) VALUES
+    (1, 'Efectivo'),
+    (2, 'Tarjeta de crédito'),
+    (3, 'Paypal'),
+    (4, 'Pago móvil');
+
+    INSERT INTO pago (id_transaccion, id_cliente, id_forma_pago, fecha_pago, total) VALUES
+    ('TRX001', 1, 1, '2024-04-19', 250.00),
+    ('TRX002', 2, 2, '2024-01-18', 150.00),
+    ('TRX003', 3, 3, '2008-05-04', 300.00),
+    ('TRX004', 4, 1, '2009-04-18', 200.00),
+    ('TRX005', 5, 2, '2024-04-15', 180.00);
+
+    INSERT INTO pedido (id_pedido, fecha_pedido, fecha_esperada, fecha_entrega, estado, comentarios, id_cliente) VALUES
+    (1, '2024-04-19', '2024-04-25', NULL, 'En proceso', 'Pedido urgente', 1),
+    (2, '2024-01-18', '2024-01-24', '2024-01-22', 'Entregado', 'Pedido estándar', 2),
+    (3, '2008-05-04', '2008-05-10', '2008-05-10', 'Entregado', 'Pedido regular', 3),
+    (4, '2009-04-18', '2009-04-22', NULL, 'Rechazado', 'Pedido urgente', 4),
+    (5, '2024-04-15', '2024-04-21', NULL, 'En proceso', 'Pedido estándar', 5),
+    (6, '2024-02-13', '2024-02-15', '2024-02-16', 'Entregado', 'Pedido estándar', 12),
+    (7, '2024-03-02', '2024-03-05', '2024-03-05', 'Entregado', 'Pedido urgente', 13);
+
     INSERT INTO gama_producto (gama, descripcion_texto, descripcion_html, imagen) VALUES
     ('Clásico', 'Productos con estilo clásico y elegante.', '<p>Productos con estilo clásico y elegante.</p>', 'imagen_clasico.jpg'),
     ('Deportivo', 'Productos diseñados para el rendimiento deportivo.', '<p>Productos diseñados para el rendimiento deportivo.</p>', 'imagen_deportivo.jpg'),
@@ -346,17 +472,17 @@
     ('PROV014', 'Mega Meals', 14);
 
     INSERT INTO producto (id_producto, nombre, gama, dimensiones, id_proveedor, descripcion, cantidad_en_stock, precio_venta, precio_proveedor) VALUES
-    ('PROD001', 'Organic Vegetables Box', 'Orgánico', '25x25x10 cm', 'PROV005', 'Caja de verduras orgánicas frescas', 100, 25.99, 15.00),
+    ('PROD001', 'Organic Vegetables Box', 'Clásico', '25x25x10 cm', 'PROV005', 'Caja de verduras orgánicas frescas', 100, 25.99, 15.00),
     ('PROD002', 'Premium Steak Selection', 'Lujo', '30x20x5 cm', 'PROV003', 'Selección de filetes de primera calidad', 50, 49.99, 35.00),
-    ('PROD003', 'Artisanal Cheese Platter', 'Gourmet', '40x30x5 cm', 'PROV002', 'Tabla de quesos artesanales variados', 30, 39.99, 28.00),
-    ('PROD004', 'Organic Fruit Basket', 'Orgánico', '35x35x15 cm', 'PROV005', 'Cesta de frutas orgánicas de temporada', 80, 29.99, 20.00),
-    ('PROD005', 'Gourmet Chocolate Assortment', 'Gourmet', '25x25x5 cm', 'PROV002', 'Surtido de chocolates gourmet', 60, 19.99, 15.00),
-    ('PROD006', 'Fresh Squeezed Juice Pack', 'Saludable', '20x20x10 cm', 'PROV008', 'Paquete de jugos naturales recién exprimidos', 120, 15.99, 10.00),
-    ('PROD007', 'Artisanal Bread Selection', 'Gourmet', '40x20x10 cm', 'PROV006', 'Selección de panes artesanales recién horneados', 40, 9.99, 6.50),
-    ('PROD008', 'Superfood Smoothie Mix', 'Saludable', '15x15x15 cm', 'PROV008', 'Mezcla de superalimentos para batidos', 100, 12.99, 8.50),
-    ('PROD009', 'Farm Fresh Eggs Carton', 'Orgánico', '15x15x10 cm', 'PROV012', 'Cartón de huevos frescos de granja', 150, 7.99, 5.00),
-    ('PROD010', 'Handcrafted Pasta Assortment', 'Gourmet', '30x30x10 cm', 'PROV006', 'Surtido de pastas artesanales', 70, 14.99, 9.00),
-    ('PROD012', 'Producto Ornamental 2', 'Ornamental', '20x20x20', 'PROV002', 'Descripción del producto Ornamental 2', 150, 29.99, 25.00);
+    ('PROD003', 'Artisanal Cheese Platter', 'Deportivo', '40x30x5 cm', 'PROV002', 'Tabla de quesos artesanales variados', 30, 39.99, 28.00),
+    ('PROD004', 'Organic Fruit Basket', 'Clásico', '35x35x15 cm', 'PROV005', 'Cesta de frutas orgánicas de temporada', 80, 29.99, 20.00),
+    ('PROD005', 'Gourmet Chocolate Assortment', 'Deportivo', '25x25x5 cm', 'PROV002', 'Surtido de chocolates gourmet', 60, 19.99, 15.00),
+    ('PROD006', 'Fresh Squeezed Juice Pack', 'Lujo', '20x20x10 cm', 'PROV008', 'Paquete de jugos naturales recién exprimidos', 120, 15.99, 10.00),
+    ('PROD007', 'Artisanal Bread Selection', 'Vintage', '40x20x10 cm', 'PROV006', 'Selección de panes artesanales recién horneados', 40, 9.99, 6.50),
+    ('PROD008', 'Superfood Smoothie Mix', 'Vintage', '15x15x15 cm', 'PROV008', 'Mezcla de superalimentos para batidos', 100, 12.99, 8.50),
+    ('PROD009', 'Farm Fresh Eggs Carton', 'Clásico', '15x15x10 cm', 'PROV012', 'Cartón de huevos frescos de granja', 150, 7.99, 5.00),
+    ('PROD010', 'Handcrafted Pasta Assortment', 'Vintage', '30x30x10 cm', 'PROV006', 'Surtido de pastas artesanales', 70, 14.99, 9.00),
+    ('PROD012', 'Producto Ornamental', 'Ornamental', '20x20x20', 'PROV002', 'Descripción del producto Ornamental 2', 150, 29.99, 25.00);
 
     INSERT INTO detalle_pedido (id_pedido, id_producto, cantidad, precio_unidad, numero_linea) VALUES
     (1, 'PROD001', 2, 25.99, 1),
@@ -370,127 +496,6 @@
     (4, 'PROD003', 1, 39.99, 2),
     (4, 'PROD005', 1, 19.99, 1),
     (5, 'PROD006', 2, 15.99, 1);
-
-    INSERT INTO pedido (id_pedido, fecha_pedido, fecha_esperada, fecha_entrega, estado, comentarios, id_cliente) VALUES
-    (1, '2024-04-19', '2024-04-25', NULL, 'En proceso', 'Pedido urgente', 1),
-    (2, '2024-01-18', '2024-01-24', '2024-01-22', 'Entregado', 'Pedido estándar', 2),
-    (3, '2008-05-04', '2008-05-10', '2008-05-10', 'Entregado', 'Pedido regular', 3),
-    (4, '2009-04-18', '2009-04-22', NULL, 'Rechazado', 'Pedido urgente', 4),
-    (5, '2024-04-15', '2024-04-21', NULL, 'En proceso', 'Pedido estándar', 5),
-    (6, '2024-02-13', '2024-02-15', '2024-02-16', 'Entregado', 'Pedido estándar', 12),
-    (7, '2024-03-02', '2024-03-05', '2024-03-05', 'Entregado', 'Pedido urgente', 13);
-
-    INSERT INTO cliente (id_cliente, nombre_cliente, nombre_contacto, apellido_contacto, telefono, fax, id_direccion, id_ciudad, id_empleado_rep_ventas, limite_credito) VALUES
-    (1, 'Cliente A', 'Juan', 'Pérez', '123-456-7890', '123-456-7890', 1, 1, 1, 10000.00),
-    (2, 'Cliente B', 'María', 'Gómez', '987-654-3210', '987-654-3210', 2, 2, 2, 15000.00),
-    (3, 'Cliente C', 'Pedro', 'Rodríguez', '111-222-3333', '111-222-3333', 3, 3, 3, 20000.00),
-    (4, 'Cliente D', 'Ana', 'López', '444-555-6666', '444-555-6666', 4, 4, 4, 25000.00),
-    (5, 'Cliente E', 'Carlos', 'Martínez', '777-888-9999', '777-888-9999', 5, 5, 5, 30000.00),
-    (6, 'Cliente F', 'Laura', 'Fernández', '000-111-2222', '000-111-2222', 6, 6, 6, 35000.00),
-    (7, 'Cliente G', 'Javier', 'Gómez', '333-444-5555', '333-444-5555', 7, 7, 7, 40000.00),
-    (8, 'Cliente H', 'Sofía', 'Pérez', '666-777-8888', '666-777-8888', 8, 8, 8, 45000.00),
-    (9, 'Cliente I', 'Diego', 'Hernández', '999-000-1111', '999-000-1111', 9, 9, 9, 50000.00),
-    (10, 'Cliente J', 'Elena', 'Sánchez', '222-333-4444', '222-333-4444', 10, 10, 10, 55000.00),
-    (11, 'Cliente Madrid', 'Juan', 'López', '123456789', '987654321', 1, 15, 11, 5000.00),
-    (12, 'Cliente Nuevo 1', 'Angel', 'Gomez', '123456789', '987654321', NULL, 1, 1, 1000.00),
-    (13, 'Cliente Nuevo 2', 'Claudia', 'Rodriguez', '987654321', '123456789', NULL, 2, 2, 2000.00),
-    (14, 'Cliente Nuevo 3', 'Juan', 'Ramirez', '66061005', '160020265', 13, 13, NULL, 35000.00),
-    (15, 'Cliente Nuevo 4', 'Mario', 'Bros', '66161516', '516156115', 1, 1, NULL, 2.00);
-
-    INSERT INTO pago (id_transaccion, id_cliente, id_forma_de_pago, fecha_pago, total) VALUES
-    ('TRX001', 1, 1, '2024-04-19', 250.00),
-    ('TRX002', 2, 2, '2024-01-18', 150.00),
-    ('TRX003', 3, 3, '2008-05-04', 300.00),
-    ('TRX004', 4, 1, '2009-04-18', 200.00),
-    ('TRX005', 5, 2, '2024-04-15', 180.00);
-
-    INSERT INTO forma_de_pago (id_forma_de_pago, nombre_forma_de_pago) VALUES
-    (1, 'Efectivo'),
-    (2, 'Tarjeta de crédito'),
-    (3, 'Paypal'),
-    (4, 'Pago móvil');
-
-    INSERT INTO empleado (id_empleado, nombre, apellido1, apellido2, extension, email, id_oficina, id_jefe, puesto) VALUES
-    (1, 'Juan', 'García', 'López', '123', 'juan.garcia@example.com', 'OF001', NULL, 'Gerente'),
-    (2, 'María', 'Martínez', 'Rodríguez', '456', 'maria.martinez@example.com', 'OF002', 1, 'Representante de ventas'),
-    (3, 'Pedro', 'Hernández', 'Pérez', '789', 'pedro.hernandez@example.com', 'OF003', 1, 'Representante de ventas'),
-    (4, 'Ana', 'López', 'Gómez', '012', 'ana.lopez@example.com', 'OF004', 2, 'Asistente'),
-    (5, 'Carlos', 'Díaz', 'Sánchez', '345', 'carlos.diaz@example.com', 'OF005', 2, 'Asistente'),
-    (6, 'Laura', 'Rodríguez', 'Fernández', '678', 'laura.rodriguez@example.com', 'OF006', 3, 'Asistente'),
-    (7, 'Javier', 'Gómez', 'Martínez', '901', 'javier.gomez@example.com', 'OF007', 3, 'Asistente'),
-    (8, 'Sofía', 'Pérez', 'González', '234', 'sofia.perez@example.com', 'OF008', 4, 'Asistente'),
-    (9, 'Diego', 'Fernández', 'López', '567', 'diego.fernandez@example.com', 'OF009', 4, 'Asistente'),
-    (10, 'Elena', 'Sánchez', 'Martínez', '890', 'elena.sanchez@example.com', 'OF010', 5, 'Asistente'),
-    (11, 'Pablo', 'González', 'Hernández', '123', 'pablo.gonzalez@example.com', 'OF011', 5, 'Representante de ventas'),
-    (12, 'Isabel', 'Gómez', 'Rodríguez', '456', 'isabel.gomez@example.com', 'OF012', 6, 'Asistente'),
-    (13, 'Andrés', 'Martínez', 'Díaz', '789', 'andres.martinez@example.com', 'OF013', 6, 'Asistente'),
-    (14, 'Luisa', 'Hernández', 'Sánchez', '012', 'luisa.hernandez@example.com', 'OF014', 7, 'Asistente'),
-    (15, 'Samuel', 'Rubiano', 'Orjuela', '1234', 'correo@ejemplo.com', NULL, NULL, 'CEO');
-
-    INSERT INTO oficina (id_oficina, id_ciudad, telefono, id_direccion) VALUES
-    ('OF001', 1, '123-456-7890', 1),
-    ('OF002', 2, '987-654-3210', 2),
-    ('OF003', 3, '111-222-3333', 3),
-    ('OF004', 4, '444-555-6666', 4),
-    ('OF005', 5, '777-888-9999', 5),
-    ('OF006', 6, '000-111-2222', 6),
-    ('OF007', 7, '333-444-5555', 7),
-    ('OF008', 8, '666-777-8888', 8),
-    ('OF009', 9, '999-000-1111', 9),
-    ('OF010', 10, '222-333-4444', 10),
-    ('OF011', 11, '555-666-7777', 11),
-    ('OF012', 12, '888-999-0000', 12),
-    ('OF013', 13, '121-314-1516', 13),
-    ('OF014', 14, '161-718-1920', 14);
-
-    INSERT INTO direccion (id_direccion, tipo_direccion, direccion, descripcion, id_ciudad) VALUES
-    (1, 'Oficina', '123 Main Street', 'Oficina principal', 1),
-    (2, 'Casa', '456 Elm Street', 'Casa de ejemplo', 2),
-    (3, 'Oficina', '789 Oak Street', 'Oficina céntrica', 3),
-    (4, 'Casa', '101 Maple Street', 'Casa de muestra', 4),
-    (5, 'Oficina', '123 Rue de la République', 'Oficina principal', 5),
-    (6, 'Casa', '456 Rue du Docteur Valois', 'Casa de ejemplo', 6),
-    (7, 'Oficina', '789 Rue de la Soie', 'Oficina céntrica', 7),
-    (8, 'Casa', '101 Rue du Commerce', 'Casa de muestra', 8),
-    (9, 'Oficina', '123 Avenida de la Constitución', 'Oficina principal', 9),
-    (10, 'Casa', '456 Calle Larios', 'Casa de ejemplo', 10),
-    (11, 'Oficina', '789 Passeig de Gràcia', 'Oficina céntrica', 11),
-    (12, 'Casa', '101 Carrer dels Arcs', 'Casa de muestra', 12),
-    (13, 'Oficina', '123 Calle 7', 'Oficina principal', 13),
-    (14, 'Casa', '456 Carrera 70', 'Casa de ejemplo', 14);
-
-    INSERT INTO ciudad (id_ciudad, nombre_ciudad, codigo_postal, id_region) VALUES
-    (1, 'Los Angeles', '90001', 1),
-    (2, 'San Francisco', '94102', 1),
-    (3, 'New York', '10001', 2),
-    (4, 'Buffalo', '14201', 2),
-    (5, 'Grenoble', '38000', 3),
-    (6, 'Lyon', '69001', 3),
-    (7, 'Tours', '37000', 4),
-    (8, 'Orléans', '45000', 4),
-    (9, 'Sevilla', '41001', 5),
-    (10, 'Málaga', '29001', 5),
-    (11, 'Barcelona', '08001', 6),
-    (12, 'Girona', '17001', 6),
-    (13, 'Bogotá', '11001', 7),
-    (14, 'Medellín', '05001', 8),
-    (15, 'Madrid', '28001', 1);
-
-    INSERT INTO region (id_region, nombre_region, id_pais) VALUES
-    (1, 'California', 1),
-    (2, 'Nueva York', 1),
-    (3, 'Isère', 2),
-    (4, 'Valle del Loira', 2),
-    (5, 'Andalucía', 3),
-    (6, 'Cataluña', 3),
-    (7, 'Bogotá D.C.', 4),
-    (8, 'Antioquia', 4);
-
-    INSERT INTO pais (id_pais, nombre_pais) VALUES
-    (1, 'Estados Unidos'),
-    (2, 'Francia'),
-    (3, 'España'),
-    (4, 'Colombia');
 
     ```
     ---
@@ -1666,10 +1671,10 @@ Con operadores básicos de comparación
 
 4. Los clientes cuyo límite de crédito sea mayor que los pagos que haya realizado. (Sin utilizar INNER JOIN).
 	```sql
-    SELECT nombre_cliente
+    SELECT c.nombre_cliente
     FROM cliente c
-    WHERE limite_credito > (
-        SELECT total
+    WHERE c.limite_credito > (
+        SELECT p.total
         FROM pago p
         WHERE c.id_cliente = p.id_cliente
     );
@@ -1744,26 +1749,318 @@ Con operadores básicos de comparación
 
 
 Subconsultas con ALL y ANY
+
 8. Devuelve el nombre del cliente con mayor límite de crédito.
+	```sql
+    SELECT nombre_cliente
+    FROM cliente 
+    WHERE limite_credito >= ALL (
+        SELECT limite_credito
+        FROM cliente
+    );
+
+    +----------------+
+    | nombre_cliente |
+    +----------------+
+    | Cliente J      |
+    +----------------+
+	```
+	---
+
 9. Devuelve el nombre del producto que tenga el precio de venta más caro.
+	```sql
+        SELECT nombre AS nombre_producto
+    FROM producto 
+    WHERE precio_venta >= ALL (
+        SELECT precio_venta
+        FROM producto
+    );
+
+    +-------------------------+
+    | nombre_producto         |
+    +-------------------------+
+    | Premium Steak Selection |
+    +-------------------------+
+	```
+	---
+
 10. Devuelve el producto que menos unidades tiene en stock. 
+	```sql
+        SELECT nombre AS nombre_producto
+    FROM producto 
+    WHERE cantidad_en_stock <= ALL (
+        SELECT cantidad_en_stock
+        FROM producto
+    );
+
+    +--------------------------+
+    | nombre_producto          |
+    +--------------------------+
+    | Artisanal Cheese Platter |
+    +--------------------------+
+	```
+	---
+
 
 Subconsultas con IN y NOT IN
 
 11. Devuelve el nombre, apellido1 y cargo de los empleados que no representen a ningún cliente.
+	```sql
+        SELECT nombre, apellido1, puesto
+    FROM empleado 
+    WHERE id_empleado NOT IN (
+        SELECT id_empleado_rep_ventas
+        FROM cliente
+        WHERE id_empleado_rep_ventas IS NOT NULL
+    );
+
+    +---------+------------+-----------+
+    | nombre  | apellido1  | puesto    |
+    +---------+------------+-----------+
+    | Isabel  | Gómez      | Asistente |
+    | Andrés  | Martínez   | Asistente |
+    | Luisa   | Hernández  | Asistente |
+    | Samuel  | Rubiano    | CEO       |
+    +---------+------------+-----------+
+	```
+	---
+
 12. Devuelve un listado que muestre solamente los clientes que no han realizado ningún pago.
+	```sql
+        SELECT nombre_cliente
+    FROM cliente  
+    WHERE id_cliente NOT IN (
+        SELECT id_cliente
+        FROM pago
+    );
+
+    +-----------------+
+    | nombre_cliente  |
+    +-----------------+
+    | Cliente F       |
+    | Cliente G       |
+    | Cliente H       |
+    | Cliente I       |
+    | Cliente J       |
+    | Cliente Madrid  |
+    | Cliente Nuevo 1 |
+    | Cliente Nuevo 2 |
+    | Cliente Nuevo 3 |
+    | Cliente Nuevo 4 |
+    +-----------------+
+	```
+	---
+
 13. Devuelve un listado que muestre solamente los clientes que sí han realizado algún pago.
+	```sql
+    SELECT nombre_cliente
+    FROM cliente  
+    WHERE id_cliente IN (
+        SELECT id_cliente
+        FROM pago
+    );
+
+    +----------------+
+    | nombre_cliente |
+    +----------------+
+    | Cliente A      |
+    | Cliente B      |
+    | Cliente C      |
+    | Cliente D      |
+    | Cliente E      |
+    +----------------+
+	```
+	---
+
 14. Devuelve un listado de los productos que nunca han aparecido en un pedido.
+	```sql
+    SELECT nombre
+    FROM producto  
+    WHERE id_producto NOT IN (
+        SELECT id_producto
+        FROM detalle_pedido
+    );
+
+    +------------------------------+
+    | nombre                       |
+    +------------------------------+
+    | Artisanal Bread Selection    |
+    | Superfood Smoothie Mix       |
+    | Farm Fresh Eggs Carton       |
+    | Handcrafted Pasta Assortment |
+    | Producto Ornamental          |
+    +------------------------------+
+	```
+	---
+
 15. Devuelve el nombre, apellidos, puesto y teléfono de la oficina de aquellos empleados que no sean representante de ventas de ningún cliente.
-16. Devuelve las oficinas donde no trabajan ninguno de los empleados que hayan sido los representantes de ventas de algún cliente que haya realizado la compra de algún producto de la gama Frutales.
-17. Devuelve un listado con los clientes que han realizado algún pedido pero no han realizado ningún pago. 18.
+	```sql
+        SELECT e.nombre, CONCAT(e.apellido1, ' ', e.apellido2) AS apellidos, o.telefono AS telefono_oficina
+    FROM empleado e
+    JOIN oficina o ON e.id_oficina = o.id_oficina
+    WHERE e.id_empleado NOT IN (
+        SELECT DISTINCT cl.id_empleado_rep_ventas
+        FROM cliente cl
+        WHERE id_empleado_rep_ventas IS NOT NULL
+    );
+
+    +---------+---------------------+------------------+
+    | nombre  | apellidos           | telefono_oficina |
+    +---------+---------------------+------------------+
+    | Isabel  | Gómez Rodríguez     | 888-999-0000     |
+    | Andrés  | Martínez Díaz       | 121-314-1516     |
+    | Luisa   | Hernández Sánchez   | 161-718-1920     |
+    +---------+---------------------+------------------+
+	```
+	---
+
+16. Devuelve las oficinas donde no trabajan ninguno de los empleados que hayan sido los representantes de ventas de algún cliente que haya realizado la compra de algún producto de la gama Clásico.
+	```sql
+    SELECT o.id_oficina, o.telefono AS telefono_oficina
+    FROM oficina o
+    WHERE o.id_oficina NOT IN (
+        SELECT e.id_oficina
+        FROM empleado e
+        WHERE e.id_oficina IS NOT NULL AND 
+        e.id_empleado NOT IN (
+            SELECT cl.id_empleado_rep_ventas
+            FROM cliente cl 
+            JOIN pedido p ON cl.id_cliente = p.id_cliente
+            JOIN detalle_pedido dp ON p.id_pedido = dp.id_pedido
+            JOIN producto pr ON dp.id_producto = pr.id_producto
+            WHERE pr.gama = "Clásico"
+        )
+    );
+
+    +------------+------------------+
+    | id_oficina | telefono_oficina |
+    +------------+------------------+
+    | OF001      | 123-456-7890     |
+    | OF002      | 987-654-3210     |
+    | OF003      | 111-222-3333     |
+    | OF004      | 444-555-6666     |
+    +------------+------------------+
+	```
+	---
+
+17. Devuelve un listado con los clientes que han realizado algún pedido pero no han realizado ningún pago.
+	```sql
+    SELECT cl.id_cliente, cl.nombre_cliente
+    FROM cliente cl
+    WHERE cl.id_cliente IN (
+        SELECT p.id_cliente
+        FROM pedido p
+    ) AND cl.id_cliente NOT IN (
+        SELECT pg.id_cliente
+        FROM pago pg
+    );
+
+    +------------+-----------------+
+    | id_cliente | nombre_cliente  |
+    +------------+-----------------+
+    |         12 | Cliente Nuevo 1 |
+    |         13 | Cliente Nuevo 2 |
+    +------------+-----------------+
+	```
+	---
+
 
 Subconsultas con EXISTS y NOT EXISTS
 
 18. Devuelve un listado que muestre solamente los clientes que no han realizado ningún pago.
+	```sql
+        SELECT cl.id_cliente, cl.nombre_cliente
+    FROM cliente cl
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM pago p
+        WHERE p.id_cliente = cl.id_cliente
+    );
+
+    +------------+-----------------+
+    | id_cliente | nombre_cliente  |
+    +------------+-----------------+
+    |          6 | Cliente F       |
+    |          7 | Cliente G       |
+    |          8 | Cliente H       |
+    |          9 | Cliente I       |
+    |         10 | Cliente J       |
+    |         11 | Cliente Madrid  |
+    |         12 | Cliente Nuevo 1 |
+    |         13 | Cliente Nuevo 2 |
+    |         14 | Cliente Nuevo 3 |
+    |         15 | Cliente Nuevo 4 |
+    +------------+-----------------+
+	```
+	---
+
 19. Devuelve un listado que muestre solamente los clientes que sí han realizado algún pago.
+	```sql
+        
+    SELECT cl.id_cliente, cl.nombre_cliente
+    FROM cliente cl
+    WHERE EXISTS (
+        SELECT 1
+        FROM pago p
+        WHERE p.id_cliente = cl.id_cliente
+    );
+
+    +------------+----------------+
+    | id_cliente | nombre_cliente |
+    +------------+----------------+
+    |          1 | Cliente A      |
+    |          2 | Cliente B      |
+    |          3 | Cliente C      |
+    |          4 | Cliente D      |
+    |          5 | Cliente E      |
+    +------------+----------------+
+	```
+	---
+
 20. Devuelve un listado de los productos que nunca han aparecido en un pedido.
+	```sql
+    SELECT pr.id_producto, pr.nombre AS nombre_producto
+    FROM producto pr
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM detalle_pedido dp
+        WHERE pr.id_producto = dp. id_producto
+    );
+
+    +-------------+------------------------------+
+    | id_producto | nombre_producto              |
+    +-------------+------------------------------+
+    | PROD007     | Artisanal Bread Selection    |
+    | PROD008     | Superfood Smoothie Mix       |
+    | PROD009     | Farm Fresh Eggs Carton       |
+    | PROD010     | Handcrafted Pasta Assortment |
+    | PROD012     | Producto Ornamental          |
+    +-------------+------------------------------+
+	```
+	---
+
 21. Devuelve un listado de los productos que han aparecido en un pedido alguna vez.
+	```sql
+    SELECT pr.id_producto, pr.nombre AS nombre_producto
+    FROM producto pr
+    WHERE EXISTS (
+        SELECT 1
+        FROM detalle_pedido dp
+        WHERE pr.id_producto = dp. id_producto
+    );
+
+    +-------------+------------------------------+
+    | id_producto | nombre_producto              |
+    +-------------+------------------------------+
+    | PROD001     | Organic Vegetables Box       |
+    | PROD002     | Premium Steak Selection      |
+    | PROD003     | Artisanal Cheese Platter     |
+    | PROD004     | Organic Fruit Basket         |
+    | PROD005     | Gourmet Chocolate Assortment |
+    | PROD006     | Fresh Squeezed Juice Pack    |
+    +-------------+------------------------------+
+	```
+	---
 
 ### Consultas variadas
 ---

@@ -684,12 +684,12 @@
     ```sql
     SELECT p.id_pedido, p.id_cliente, p.fecha_esperada, p.fecha_entrega
     FROM pedido p
-    WHERE p.fecha_esperada = p.fecha_entrega;
+    WHERE p.fecha_esperada < p.fecha_entrega;
     
     +-----------+------------+----------------+---------------+
     | id_pedido | id_cliente | fecha_esperada | fecha_entrega |
     +-----------+------------+----------------+---------------+
-    |         3 |          3 | 2008-05-10     | 2008-05-10    |
+    |         6 |         12 | 2024-02-15     | 2024-02-16    |
     +-----------+------------+----------------+---------------+
     ```
     ---
@@ -915,16 +915,18 @@ Resuelva todas las consultas utilizando la sintaxis de SQL1 y SQL2. Las consulta
     JOIN ciudad c ON o.id_ciudad = c.id_ciudad
     WHERE id_cliente NOT IN (SELECT id_cliente FROM pago);
 
-    +----------------+---------------------------+----------------+
-    | nombre_cliente | nombre_representante      | ciudad_oficina |
-    +----------------+---------------------------+----------------+
-    | Cliente F      | Laura Rodríguez Fernández | Lyon           |
-    | Cliente G      | Javier Gómez Martínez     | Tours          |
-    | Cliente H      | Sofía Pérez González      | Orléans        |
-    | Cliente I      | Diego Fernández López     | Sevilla        |
-    | Cliente J      | Elena Sánchez Martínez    | Málaga         |
-    | Cliente Madrid | Pablo González Hernández  | Barcelona      |
-    +----------------+---------------------------+----------------+
+    +-----------------+---------------------------+----------------+
+    | nombre_cliente  | nombre_representante      | ciudad_oficina |
+    +-----------------+---------------------------+----------------+
+    | Cliente Nuevo 1 | Juan García López         | Los Angeles    |
+    | Cliente Nuevo 2 | María Martínez Rodríguez  | San Francisco  |
+    | Cliente F       | Laura Rodríguez Fernández | Lyon           |
+    | Cliente G       | Javier Gómez Martínez     | Tours          |
+    | Cliente H       | Sofía Pérez González      | Orléans        |
+    | Cliente I       | Diego Fernández López     | Sevilla        |
+    | Cliente J       | Elena Sánchez Martínez    | Málaga         |
+    | Cliente Madrid  | Pablo González Hernández  | Barcelona      |
+    +-----------------+---------------------------+----------------+
     ```
     ---
 6. Lista la dirección de las oficinas que tengan clientes en Bogotá.
@@ -2239,5 +2241,507 @@ Subconsultas con EXISTS y NOT EXISTS
     | Bogotá        |              1 |
     | Medellín      |              1 |
     +---------------+----------------+
+	```
+	---
+
+### Vistas
+---
+
+Debe generar 10 vistas por cada Base de datos (Las vistas pueden ser tomadas de los comandos sql ya desarrollados)
+
+1. Devuelve un listado de los productos que nunca han aparecido en un pedido.
+	```sql
+    CREATE VIEW productos_no_pedidos AS 
+    SELECT pr.id_producto, pr.nombre AS nombre_producto
+    FROM producto pr
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM detalle_pedido dp
+        WHERE pr.id_producto = dp. id_producto
+    );
+    SELECT * FROM productos_no_pedidos;
+
+    +-------------+------------------------------+
+    | id_producto | nombre_producto              |
+    +-------------+------------------------------+
+    | PROD007     | Artisanal Bread Selection    |
+    | PROD008     | Superfood Smoothie Mix       |
+    | PROD009     | Farm Fresh Eggs Carton       |
+    | PROD010     | Handcrafted Pasta Assortment |
+    | PROD012     | Producto Ornamental          |
+    +-------------+------------------------------+
+	```
+	---
+
+2. Muestra el nombre de los clientes que hayan realizado pagos junto con el nombre de sus representantes de ventas.
+	```sql
+    CREATE VIEW clientes_pagos AS 
+    SELECT cl.nombre_cliente, CONCAT(e.nombre, ' ', e.apellido1, ' ', e.apellido2) AS nombre_rep_ventas
+    FROM cliente cl
+    JOIN pago p ON cl.id_cliente = p.id_cliente
+    JOIN empleado e ON cl.id_empleado_rep_ventas = e.id_empleado;
+
+    SELECT * FROM clientes_pagos;
+
+    +----------------+--------------------------+
+    | nombre_cliente | nombre_rep_ventas        |
+    +----------------+--------------------------+
+    | Cliente A      | Juan García López        |
+    | Cliente B      | María Martínez Rodríguez |
+    | Cliente C      | Pedro Hernández Pérez    |
+    | Cliente D      | Ana López Gómez          |
+    | Cliente E      | Carlos Díaz Sánchez      |
+    +----------------+--------------------------+
+	```
+	---
+    
+3. Calcula el precio de venta del producto más caro y más barato en una misma consulta.
+	```sql
+    CREATE VIEW precio_productos AS 
+    SELECT MAX(precio_venta) AS precio_mas_caro, MIN(precio_venta) AS precio_mas_barato
+    FROM producto;
+
+    SELECT * FROM precio_productos;
+
+    +-----------------+-------------------+
+    | precio_mas_caro | precio_mas_barato |
+    +-----------------+-------------------+
+    |           49.99 |              7.99 |
+    +-----------------+-------------------+
+	```
+	---
+    
+4. Devuelve un listado que muestre solamente los clientes que sí han realizado algún pago.
+	```sql
+    CREATE VIEW clientes_si_pago AS 
+    SELECT cl.id_cliente, cl.nombre_cliente
+    FROM cliente cl
+    WHERE EXISTS (
+        SELECT 1
+        FROM pago p
+        WHERE p.id_cliente = cl.id_cliente
+    );
+
+    SELECT * FROM clientes_si_pago;
+
+    +------------+----------------+
+    | id_cliente | nombre_cliente |
+    +------------+----------------+
+    |          1 | Cliente A      |
+    |          2 | Cliente B      |
+    |          3 | Cliente C      |
+    |          4 | Cliente D      |
+    |          5 | Cliente E      |
+    +------------+----------------+
+	```
+	---
+    
+5. Devuelve un listado con el código de pedido, código de cliente, fecha esperada y fecha de entrega de los pedidos que no han sido entregados a tiempo.
+	```sql
+    CREATE VIEW pedidos_no_a_tiempo AS 
+    SELECT p.id_pedido, p.id_cliente, p.fecha_esperada, p.fecha_entrega
+    FROM pedido p
+    WHERE p.fecha_esperada < p.fecha_entrega;
+
+    SELECT * FROM pedidos_no_a_tiempo;
+
+    +-----------+------------+----------------+---------------+
+    | id_pedido | id_cliente | fecha_esperada | fecha_entrega |
+    +-----------+------------+----------------+---------------+
+    |         6 |         12 | 2024-02-15     | 2024-02-16    |
+    +-----------+------------+----------------+---------------+
+	```
+	---
+    
+6. Devuelve un listado con los datos de los empleados que no tienen clientes asociados y el nombre de su jefe asociado. 
+	```sql
+    CREATE VIEW empleados_sin_clientes AS 
+    SELECT e.id_empleado, CONCAT(e.nombre, ' ', e.apellido1, ' ', e.apellido2) AS nombre_empleado, j.id_empleado AS id_jefe, CONCAT(j.nombre, ' ', j.apellido1, ' ', j.apellido2) AS nombre_jefe
+    FROM empleado e
+    LEFT JOIN empleado j ON e.id_jefe = j.id_empleado
+    LEFT JOIN cliente cl ON e.id_empleado = cl.id_empleado_rep_ventas
+    WHERE cl.id_empleado_rep_ventas IS NULL;
+
+    SELECT * FROM empleados_sin_clientes;
+
+    +-------------+-------------------------+---------+---------------------------+
+    | id_empleado | nombre_empleado         | id_jefe | nombre_jefe               |
+    +-------------+-------------------------+---------+---------------------------+
+    |          12 | Isabel Gómez Rodríguez  |       6 | Laura Rodríguez Fernández |
+    |          13 | Andrés Martínez Díaz    |       6 | Laura Rodríguez Fernández |
+    |          14 | Luisa Hernández Sánchez |       7 | Javier Gómez Martínez     |
+    |          15 | Samuel Rubiano Orjuela  |    NULL | NULL                      |
+    +-------------+-------------------------+---------+---------------------------+
+	```
+	---
+    
+7. Devuelve un listado de todos los pedidos que han sido entregados en el mes de enero de cualquier año.
+	```sql
+    CREATE VIEW pedidos_enero AS 
+    SELECT p.id_pedido, p.id_cliente, p.fecha_pedido, p.fecha_esperada, fecha_entrega, p.estado
+    FROM pedido p
+    WHERE p.estado = 'Entregado' AND MONTH(p.fecha_entrega
+    ) = '01';
+
+    SELECT * FROM pedidos_enero;
+
+    +-----------+------------+--------------+----------------+---------------+-----------+
+    | id_pedido | id_cliente | fecha_pedido | fecha_esperada | fecha_entrega | estado    |
+    +-----------+------------+--------------+----------------+---------------+-----------+
+    |         2 |          2 | 2024-01-18   | 2024-01-24     | 2024-01-22    | Entregado |
+    +-----------+------------+--------------+----------------+---------------+-----------+
+	```
+	---
+    
+8. Devuelve el nombre de los clientes que no hayan hecho pagos y el nombre de sus representantes junto con la ciudad de la oficina a la que pertenece el representante.
+	```sql
+    CREATE VIEW clientes_no_pago AS 
+    SELECT cl.nombre_cliente, CONCAT(e.nombre, ' ', e.apellido1, ' ', e.apellido2) AS nombre_representante, c.nombre_ciudad AS ciudad_oficina
+    FROM cliente cl
+    JOIN empleado e ON cl.id_empleado_rep_ventas = e.id_empleado
+    JOIN oficina o ON e.id_oficina = o.id_oficina
+    JOIN ciudad c ON o.id_ciudad = c.id_ciudad
+    WHERE id_cliente NOT IN (SELECT id_cliente FROM pago);
+
+    SELECT * FROM clientes_no_pago;
+
+    +-----------------+---------------------------+----------------+
+    | nombre_cliente  | nombre_representante      | ciudad_oficina |
+    +-----------------+---------------------------+----------------+
+    | Cliente Nuevo 1 | Juan García López         | Los Angeles    |
+    | Cliente Nuevo 2 | María Martínez Rodríguez  | San Francisco  |
+    | Cliente F       | Laura Rodríguez Fernández | Lyon           |
+    | Cliente G       | Javier Gómez Martínez     | Tours          |
+    | Cliente H       | Sofía Pérez González      | Orléans        |
+    | Cliente I       | Diego Fernández López     | Sevilla        |
+    | Cliente J       | Elena Sánchez Martínez    | Málaga         |
+    | Cliente Madrid  | Pablo González Hernández  | Barcelona      |
+    +-----------------+---------------------------+----------------+
+	```
+	---
+    
+9. Devuelve un listado con el nombre de los todos los clientes españoles.
+	```sql
+    CREATE VIEW clientes_españa AS 
+    SELECT cl.nombre_cliente
+    FROM cliente cl
+    JOIN ciudad c ON cl.id_ciudad = c.id_ciudad
+    JOIN region r ON c.id_region = r.id_region
+    JOIN pais p ON r.id_pais = p.id_pais
+    WHERE p.nombre_pais = "España";
+
+    SELECT * FROM clientes_españa;
+
+    +----------------+
+    | nombre_cliente |
+    +----------------+
+    | Cliente I      |
+    | Cliente J      |
+    +----------------+
+	```
+	---
+    
+10. Devuelve un listado con todos los clientes que sean de la ciudad de Madrid y cuyo representante de ventas tenga el código de empleado 11 o 30.
+	```sql
+    CREATE VIEW clientes_madrid AS 
+    SELECT cl.id_cliente, cl.nombre_cliente, cl.telefono, cl.id_ciudad, c.nombre_ciudad, cl.id_empleado_rep_ventas
+    FROM cliente cl
+    JOIN ciudad c ON cl.id_ciudad = c.id_ciudad
+    WHERE c.nombre_ciudad = 'Madrid' AND cl.id_empleado_rep_ventas IN (11, 30); 
+
+    SELECT * FROM clientes_madrid;
+
+    +------------+----------------+-----------+-----------+---------------+------------------------+
+    | id_cliente | nombre_cliente | telefono  | id_ciudad | nombre_ciudad | id_empleado_rep_ventas |
+    +------------+----------------+-----------+-----------+---------------+------------------------+
+    |         11 | Cliente Madrid | 123456789 |        15 | Madrid        |                     11 |
+    +------------+----------------+-----------+-----------+---------------+------------------------+
+	```
+	---
+    
+### Procedimientos almacenados
+
+1. Procedimiento para agregar un cliente
+	```sql
+    DELIMITER $$
+    DROP PROCEDURE IF EXISTS CrearCliente;
+    CREATE PROCEDURE CrearCliente(
+        IN p_id_cliente INT(11),
+        IN p_nombre_cliente VARCHAR(50),
+        IN p_nombre_contacto VARCHAR(30),
+        IN p_apellido_contacto VARCHAR(30),
+        IN p_telefono VARCHAR(15),
+        IN p_fax VARCHAR(15),
+        IN p_id_direccion INT(5),
+        IN p_id_ciudad INT(5),
+        IN p_id_empleado_rep_ventas INT(11),
+        IN p_limite_credito DECIMAL(15,2)
+    )
+    BEGIN
+        INSERT INTO cliente (id_cliente, nombre_cliente, nombre_contacto, apellido_contacto, telefono, fax, id_direccion, id_ciudad, id_empleado_rep_ventas, limite_credito) 
+        VALUES (p_id_cliente, p_nombre_cliente, p_nombre_contacto, p_apellido_contacto, p_telefono, p_fax, p_id_direccion, p_id_ciudad, p_id_empleado_rep_ventas, p_limite_credito);
+        
+        SELECT *
+        FROM cliente
+        WHERE id_cliente = p_id_cliente; 
+    END $$
+    DELIMITER ; $$
+
+    CALL CrearCliente(16, 'Cliente Nuevo 5', 'Karen', 'Camacho', '111-111-1111', '222-222-2222', 1, 1, 1, 1000.00);
+
+    +------------+-----------------+-----------------+-------------------+--------------+--------------+--------------+-----------+------------------------+----------------+
+    | id_cliente | nombre_cliente  | nombre_contacto | apellido_contacto | telefono     | fax          | id_direccion | id_ciudad | id_empleado_rep_ventas | limite_credito |
+    +------------+-----------------+-----------------+-------------------+--------------+--------------+--------------+-----------+------------------------+----------------+
+    |         16 | Cliente Nuevo 5 | Karen           | Camacho           | 111-111-1111 | 222-222-2222 |            1 |         1 |                      1 |        1000.00 |
+    +------------+-----------------+-----------------+-------------------+--------------+--------------+--------------+-----------+------------------------+----------------+
+	```
+	---
+2. Procedimiento para actualizar un cliente
+	```sql
+    DELIMITER $$
+    DROP PROCEDURE IF EXISTS ActualizarCliente;
+    CREATE PROCEDURE ActualizarCliente (
+        IN p_id_cliente INT,
+        IN p_nombre_cliente VARCHAR(50),
+        IN p_nombre_contacto VARCHAR(30),
+        IN p_apellido_contacto VARCHAR(30),
+        IN p_telefono VARCHAR(15),
+        IN p_fax VARCHAR(15),
+        IN p_id_direccion INT,
+        IN p_id_ciudad INT,
+        IN p_id_empleado_rep_ventas INT,
+        IN p_limite_credito DECIMAL(15,2)
+    )
+    BEGIN
+        UPDATE cliente
+        SET nombre_cliente = p_nombre_cliente,
+            nombre_contacto = p_nombre_contacto,
+            apellido_contacto = p_apellido_contacto,
+            telefono = p_telefono,
+            fax = p_fax,
+            id_direccion = p_id_direccion,
+            id_ciudad = p_id_ciudad,
+            id_empleado_rep_ventas = p_id_empleado_rep_ventas,
+            limite_credito = p_limite_credito
+        WHERE id_cliente = p_id_cliente;
+
+        SELECT *
+        FROM cliente
+        WHERE id_cliente = p_id_cliente; 
+    END $$
+    DELIMITER ; $$
+
+    CALL ActualizarCliente(16, 'Cliente Actualizado', 'Liseth', 'Mejia', '777-777-7777', '333-333-3333', 1, 1, 4, 1000.00);
+
+    +------------+---------------------+-----------------+-------------------+--------------+--------------+--------------+-----------+------------------------+----------------+
+    | id_cliente | nombre_cliente      | nombre_contacto | apellido_contacto | telefono     | fax          | id_direccion | id_ciudad | id_empleado_rep_ventas | limite_credito |
+    +------------+---------------------+-----------------+-------------------+--------------+--------------+--------------+-----------+------------------------+----------------+
+    |         16 | Cliente Actualizado | Liseth          | Mejia             | 777-777-7777 | 333-333-3333 |            1 |         1 |                      4 |        1000.00 |
+    +------------+---------------------+-----------------+-------------------+--------------+--------------+--------------+-----------+------------------------+----------------+
+	```
+	---
+3. Procedimiento para eliminar un cliente
+	```sql
+    DELIMITER $$
+    DROP PROCEDURE IF EXISTS EliminarCliente;
+    CREATE PROCEDURE EliminarCliente (
+        IN p_id_cliente INT
+    )
+    BEGIN
+        DECLARE cliente_eliminado INT;
+
+        DELETE FROM cliente
+        WHERE id_cliente = p_id_cliente;
+
+        SELECT COUNT(id_cliente)
+        INTO cliente_eliminado
+        FROM cliente
+        WHERE id_cliente = p_id_cliente;
+
+        IF cliente_eliminado = 0 THEN
+            SELECT CONCAT('Se eliminó el cliente de id: ', p_id_cliente) AS Mensaje;
+        ELSE
+            SELECT 'No se pudo eliminar el cliente' AS Mensaje;
+        END IF;
+    END $$
+    DELIMITER ; $$
+
+    CALL EliminarCliente(16);
+
+    +---------------------------------+
+    | Mensaje                         |
+    +---------------------------------+
+    | Se eliminó el cliente de id: 16 |
+    +---------------------------------+
+	```
+	---
+4. Procedimiento para buscar un cliente por ID
+	```sql
+    DELIMITER $$
+    DROP PROCEDURE IF EXISTS BuscarClientePorID;
+    CREATE PROCEDURE BuscarClientePorID (
+        IN p_id_cliente INT
+    )
+    BEGIN
+        SELECT *
+        FROM cliente
+        WHERE id_cliente = p_id_cliente;
+    END $$
+    DELIMITER ; $$
+
+    CALL BuscarClientePorID(15);
+
+    +------------+-----------------+-----------------+-------------------+----------+-----------+--------------+-----------+------------------------+----------------+
+    | id_cliente | nombre_cliente  | nombre_contacto | apellido_contacto | telefono | fax       | id_direccion | id_ciudad | id_empleado_rep_ventas | limite_credito |
+    +------------+-----------------+-----------------+-------------------+----------+-----------+--------------+-----------+------------------------+----------------+
+    |         15 | Cliente Nuevo 4 | Mario           | Bros              | 66161516 | 516156115 |            1 |         1 |                   NULL |           2.00 |
+    +------------+-----------------+-----------------+-------------------+----------+-----------+--------------+-----------+------------------------+----------------+
+	```
+	---
+5. Procedimiento para buscar un cliente por nombre
+	```sql
+    DELIMITER $$
+    DROP PROCEDURE IF EXISTS BuscarClientePorNombre;
+    CREATE PROCEDURE BuscarClientePorNombre (
+        IN p_nombre_cliente VARCHAR(50)
+    )
+    BEGIN
+        SELECT *
+        FROM cliente
+        WHERE nombre_cliente = p_nombre_cliente;
+    END $$
+    DELIMITER ; $$
+
+    CALL BuscarClientePorNombre("Cliente Nuevo 4");
+
+    +------------+-----------------+-----------------+-------------------+----------+-----------+--------------+-----------+------------------------+----------------+
+    | id_cliente | nombre_cliente  | nombre_contacto | apellido_contacto | telefono | fax       | id_direccion | id_ciudad | id_empleado_rep_ventas | limite_credito |
+    +------------+-----------------+-----------------+-------------------+----------+-----------+--------------+-----------+------------------------+----------------+
+    |         15 | Cliente Nuevo 4 | Mario           | Bros              | 66161516 | 516156115 |            1 |         1 |                   NULL |           2.00 |
+    +------------+-----------------+-----------------+-------------------+----------+-----------+--------------+-----------+------------------------+----------------+
+	```
+	---
+6. Procedimiento para buscar un cliente por ciudad
+	```sql
+    DELIMITER $$
+    DROP PROCEDURE IF EXISTS BuscarClientePorCiudad;
+
+    CREATE PROCEDURE BuscarClientePorCiudad (
+        IN p_id_ciudad INT
+    )
+    BEGIN
+        SELECT *
+        FROM cliente
+        WHERE id_ciudad = p_id_ciudad;
+    END $$
+    DELIMITER ; $$
+
+    CALL BuscarClientePorCiudad(1);
+
+    +------------+-----------------+-----------------+-------------------+--------------+--------------+--------------+-----------+------------------------+----------------+
+    | id_cliente | nombre_cliente  | nombre_contacto | apellido_contacto | telefono     | fax          | id_direccion | id_ciudad | id_empleado_rep_ventas | limite_credito |
+    +------------+-----------------+-----------------+-------------------+--------------+--------------+--------------+-----------+------------------------+----------------+
+    |          1 | Cliente A       | Juan            | Pérez             | 123-456-7890 | 123-456-7890 |            1 |         1 |                      1 |       10000.00 |
+    |         12 | Cliente Nuevo 1 | Angel           | Gomez             | 123456789    | 987654321    |         NULL |         1 |                      1 |        1000.00 |
+    |         15 | Cliente Nuevo 4 | Mario           | Bros              | 66161516     | 516156115    |            1 |         1 |                   NULL |           2.00 |
+    +------------+-----------------+-----------------+-------------------+--------------+--------------+--------------+-----------+------------------------+----------------+
+	```
+	---
+7. Procedimiento para buscar un cliente por límite de crédito
+	```sql
+    DELIMITER $$
+    DROP PROCEDURE IF EXISTS BuscarClientePorLimiteCredito;
+    CREATE PROCEDURE BuscarClientePorLimiteCredito (
+        IN p_limite DECIMAL(15,2)
+    )
+    BEGIN
+        SELECT *
+        FROM cliente
+        WHERE limite_credito = p_limite;
+    END $$
+    DELIMITER ; $$
+
+    CALL BuscarClientePorLimiteCredito(1000.00);
+
+    +------------+-----------------+-----------------+-------------------+-----------+-----------+--------------+-----------+------------------------+----------------+
+    | id_cliente | nombre_cliente  | nombre_contacto | apellido_contacto | telefono  | fax       | id_direccion | id_ciudad | id_empleado_rep_ventas | limite_credito |
+    +------------+-----------------+-----------------+-------------------+-----------+-----------+--------------+-----------+------------------------+----------------+
+    |         12 | Cliente Nuevo 1 | Angel           | Gomez             | 123456789 | 987654321 |         NULL |         1 |                      1 |        1000.00 |
+    +------------+-----------------+-----------------+-------------------+-----------+-----------+--------------+-----------+------------------------+----------------+
+	```
+	---
+8. Procedimiento para obtener todos los clientes
+    ```sql
+    DELIMITER $$
+    DROP PROCEDURE IF EXISTS ObtenerIDClientes;
+    CREATE PROCEDURE ObtenerIDClientes ()
+    BEGIN
+        SELECT id_cliente
+        FROM cliente
+        ORDER BY id_cliente ASC;
+    END $$
+    DELIMITER ; $$
+
+    CALL ObtenerIDClientes();
+
+    +------------+
+    | id_cliente |
+    +------------+
+    |          1 |
+    |          2 |
+    |          3 |
+    |          4 |
+    |          5 |
+    |          6 |
+    |          7 |
+    |          8 |
+    |          9 |
+    |         10 |
+    |         11 |
+    |         12 |
+    |         13 |
+    |         14 |
+    |         15 |
+    +------------+
+	```
+	---
+9. Procedimiento para obtener el total de clientes
+    ```sql
+    DELIMITER $$
+    DROP PROCEDURE IF EXISTS ObtenerTotalClientes;
+    CREATE PROCEDURE ObtenerTotalClientes ()
+    BEGIN
+        SELECT COUNT(*) AS total_clientes
+        FROM cliente;
+    END $$
+    DELIMITER ; $$
+
+    CALL ObtenerTotalClientes();
+
+    +----------------+
+    | total_clientes |
+    +----------------+
+    |             15 |
+    +----------------+
+	```
+	---
+10. Procedimiento para obtener el promedio del límite de crédito de los clientes
+    ```sql
+    DELIMITER $$
+    DROP PROCEDURE IF EXISTS ObtenerPromedioLimiteCreditoClientes;
+    CREATE PROCEDURE ObtenerPromedioLimiteCreditoClientes ()
+    BEGIN
+        SELECT AVG(limite_credito) AS promedio_limite_credito
+        FROM cliente;
+    END $$
+    DELIMITER ; $$
+
+    CALL ObtenerPromedioLimiteCreditoClientes();
+
+    +-------------------------+
+    | promedio_limite_credito |
+    +-------------------------+
+    |            24533.466667 |
+    +-------------------------+
 	```
 	---

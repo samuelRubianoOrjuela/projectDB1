@@ -2737,7 +2737,7 @@ Debe generar 10 vistas por cada Base de datos (Las vistas pueden ser tomadas de 
     DELIMITER ; $$
 
     CALL ObtenerPromedioLimiteCreditoClientes();
-
+    
     +-------------------------+
     | promedio_limite_credito |
     +-------------------------+

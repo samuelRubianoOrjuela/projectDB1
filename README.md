@@ -1,7 +1,8 @@
 # Proyecto Bases de Datos #1
+
+![Texto alternativo](./structure.png)
 ### Consultas sobre una tabla
 ---
-
 1. Devuelve un listado con el código de oficina y la ciudad donde hay oficinas.
     ```sql
     SELECT o.id_oficina, c.nombre_ciudad
